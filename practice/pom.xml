@@ -51,6 +51,12 @@
     		<groupId>org.springframework.boot</groupId>
   	  		<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
+		<dependency>
+    		<!-- "Lombok"の依存関係 -->
+    		<groupId>org.projectlombok</groupId>
+  	  		<artifactId>lombok</artifactId>
+  	  		<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
