@@ -1,103 +1,90 @@
-/****************************************************************************************************
- * ファイル名：ContactController(Lombok.ver)
- * 詳細　　　：コントローラクラス
- * 　　　　　　@ModelAttribute...リクエストデータをモデルクラスにバインディング
- * 　　　　　　　　　　　　　　 ここでは"ContactData"にバインド
- ****************************************************************************************************/
 package com.example.demo.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.ModelAndView;
 
-import com.example.demo.data.ContactData;
+import com.example.demo.entity.Contact;
+import com.example.demo.form.ContactForm;
+import com.example.demo.repository.ContactRepository;
 
 @Controller
 public class ContactController {
-	/**************************************************
-	 * 戻り値　　　：ModelAndView（ビューとデータを統合して返す）
-	 * モデル　　　：ContactData（フォームデータを格納するクラス）
-	 * レスポンス先：confirmation（Thymeleafテンプレート）
-	 **************************************************/
-	@PostMapping("/contact")
-	public ModelAndView contact(@ModelAttribute ContactData contactData, ModelAndView mv) {
-		// レスポンス先のファイル名
-		mv.setViewName("confirmation");
+    @Autowired
+    private ContactRepository contactRepository;
 
-		// ContactDataの各フィールドをビューで表示するためにセット
-		mv.addObject("lastName", contactData.getLastName());
-		mv.addObject("firstName", contactData.getFirstName());
-		mv.addObject("email", contactData.getEmail());
-		mv.addObject("phone", contactData.getPhone());
-		mv.addObject("zipCode", contactData.getZipCode());
-		mv.addObject("address", contactData.getAddress());
-		mv.addObject("buildingName", contactData.getBuildingName());
-		mv.addObject("contactType", contactData.getContactType());
-		mv.addObject("body", contactData.getBody());
-		
-		return mv; 
-	}
+    @GetMapping("/contact")
+    public String contact(Model model) {
+        model.addAttribute("contactForm", new ContactForm());
+
+        return "contact";
+    }
+
+    @PostMapping("/contact")
+    public String contact(@Validated @ModelAttribute("contactForm") ContactForm contactForm, BindingResult errorResult, HttpServletRequest request) {
+
+        if (errorResult.hasErrors()) {
+          return "contact";
+        }
+
+        HttpSession session = request.getSession();
+        session.setAttribute("contactForm", contactForm);
+
+        return "redirect:/contact/confirm";
+    }
+
+    @GetMapping("/contact/confirm")
+    public String confirm(Model model, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+
+        ContactForm contactForm = (ContactForm) session.getAttribute("contactForm");
+        model.addAttribute("contactForm", contactForm);
+        return "confirmation";
+    }
+
+    @PostMapping("/contact/register")
+    public String register(Model model, HttpServletRequest request) {
+
+        HttpSession session = request.getSession();
+        ContactForm contactForm = (ContactForm) session.getAttribute("contactForm");
+
+        Contact contact = new Contact();
+        contact.setLastName(contactForm.getLastName());
+        contact.setFirstName(contactForm.getFirstName());
+        contact.setEmail(contactForm.getEmail());
+        contact.setPhone(contactForm.getPhone());
+        contact.setZipCode(contactForm.getZipCode());
+        contact.setAddress(contactForm.getAddress());
+        contact.setBuildingName(contactForm.getBuildingName());
+        contact.setContactType(contactForm.getContactType());
+        contact.setBody(contactForm.getBody());
+
+        contactRepository.save(contact);
+
+        return "redirect:/contact/complete";
+    }
+
+    @GetMapping("/contact/complete")
+    public String complete(Model model, HttpServletRequest request) {
+
+        if (request.getSession(false) == null) {
+          return "redirect:/contact";
+        }
+
+        HttpSession session = request.getSession();
+        ContactForm contactForm = (ContactForm) session.getAttribute("contactForm");
+        model.addAttribute("contactForm", contactForm);
+
+        session.invalidate();
+
+        return "completion";
+    }
 }
-
-/****************************************************************************************************
- * ファイル名：ContactController(thmeleafのみ使用）
- * 詳細　　　：コントローラクラス
- * 　　　　　　- Contact.htmlから送られてきたリクエストを受け取る
- * 　　　　　　- confiramation.htmlへ受け取ったリクエストをレスポンス
- ****************************************************************************************************/
-/*
-package com.example.demo.controller;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
-
-@Controller
-public class ContactController { */
-	/**************************************************
-	 * @...アノテーション
-	 * ソースコードに追加情報を付与、その情報をコンパイラ実行処理、他のツールが使用できるようにする
-	 * @Controller...コントローラとして扱えるようになる
-	 * @PostMapping...付与されたメソッドがHTTPのPOSTリクエストを処理するためのメソッドであることを示す
-	 * @RequestParam...特定のHTTPリクエストをコントローラメソッドの引数として受け取れる
-	 **************************************************/
-
-/*
-	@PostMapping("/contact")
-	public ModelAndView contact(
-			// 入力フォームに入力された値を受け取る為のパラメータを用意
-			// 基本的に入力フォームのパラメータ分
-			@RequestParam("lastName") String lastName,
-			@RequestParam("firstName") String firstName,
-			@RequestParam("email") String email,
-			@RequestParam("phone") String phone,
-			@RequestParam("zipCode") String zipCode,
-			@RequestParam("address") String address,
-			@RequestParam("buildingName") String buildingName,
-			@RequestParam("contactType") String contactType,
-			@RequestParam("body") String body,
-			ModelAndView mv) // 引数にModelViewを設定
-	{
-		// 使用するViewのテンプレート名を指定
-		mv.setViewName("confirmation");
-
-		// テンプレートで表示する要素のキー値を指定
-		// 要はクライアント側で見るためのパラメータをここで格納
-		mv.addObject("lastName", lastName);
-		mv.addObject("firstName", firstName);
-		mv.addObject("email", email);
-		mv.addObject("phone", phone);
-		mv.addObject("zipCode", zipCode);
-		mv.addObject("address", address);
-		mv.addObject("buildingName", buildingName);
-		mv.addObject("contactType", contactType);
-		mv.addObject("body", body);
-
-		// ModelViewクラスを返す
-		// ※クライアントへレスポンス
-		return mv;
-	}
-}
-*/
