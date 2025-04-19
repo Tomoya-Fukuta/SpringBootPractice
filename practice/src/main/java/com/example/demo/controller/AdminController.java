@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -77,8 +79,16 @@ public class AdminController {
 	 * - 更新；特定のお問い合わせ
 	 **************************************************/
 	@PostMapping("/admin/contacts/{id}/edit")
-	public String updateContact(@PathVariable Long id, @ModelAttribute ContactForm contactForm) {
+	public String updateContact(
+			@PathVariable Long id, @Validated @ModelAttribute ContactForm contactForm, BindingResult result, Model model) {
+		
+		if(result.hasErrors()) {
+			model.addAttribute("contactForm", contactForm);
+			return "contact/contactEdit";
+		}
+		
 		Optional<Contact> updateContact = contactService.updateContact(id, contactForm);
+
 		
 		if(updateContact.isPresent()) {
 			return "redirect:/admin/contacts/{id}";
