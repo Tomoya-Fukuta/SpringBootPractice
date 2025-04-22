@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import lombok.Data;
 
@@ -14,13 +15,16 @@ import lombok.Data;
 public class ContactForm implements Serializable {
 	
     @NotBlank
+    @Size(max = 255, min = 1)
     private String lastName;
 
     @NotBlank
+    @Size(max = 255, min = 1)
     private String firstName;
 
     @NotBlank
     @Email
+    @Size(max = 255, min = 1)
     private String email;
 
     @NotBlank
@@ -33,9 +37,11 @@ public class ContactForm implements Serializable {
     private String zipCode;
 
     @NotBlank
+    @Size(max = 255, min = 1)
     private String address;
 
     @NotBlank
+    @Size(max = 255, min = 1)
     private String buildingName;
 
     @NotEmpty
