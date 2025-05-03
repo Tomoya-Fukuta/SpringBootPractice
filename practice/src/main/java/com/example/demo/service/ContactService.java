@@ -10,8 +10,16 @@ public interface ContactService {
 
     void saveContact(ContactForm contactForm);
 
-	// テーブル情報を取得
-	List<Contact> getAllContacts();
-	// お問い合わせの詳細情報を取得
-	Optional<Contact> getContact(Long id);
+	// 取得：全てのお問い合わせ
+	List<ContactForm> getAllContacts();
+	// 取得：お問い合わせの詳細
+	Optional<ContactForm> getContact(Long id);
+	
+	// 更新：特定のお問い合わせ
+	Optional<Contact> updateContact(Long id, ContactForm contactForm);
+
+	// 削除：全てのお問い合わせ
+	void deleteAllContacts();
+	// 削除：特定のお問い合わせ
+	void deleteContact(Long id);
 }
