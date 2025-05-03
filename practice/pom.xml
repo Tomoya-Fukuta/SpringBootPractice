@@ -47,6 +47,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
     		<!-- "Thymeleaf"の依存関係 -->
     		<groupId>org.springframework.boot</groupId>
   	  		<artifactId>spring-boot-starter-thymeleaf</artifactId>

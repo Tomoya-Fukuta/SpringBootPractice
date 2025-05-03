@@ -21,14 +21,49 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.demo.entity.Contact;
+import com.example.demo.form.AdminForm;
 import com.example.demo.form.ContactForm;
+import com.example.demo.service.AdminService;
 import com.example.demo.service.ContactService;
 
 @Controller
 public class AdminController {
 
     @Autowired
+    private AdminService adminService;
 	private ContactService contactService;
+
+	/**************************************************
+	 * - ログイン画面
+	 * 
+	 * ----------<< URL >>----------
+	 * http://localhost:8080/admin/signin
+	 **************************************************/
+    @GetMapping("/admin/signin")
+    public String signinAdmin() {
+    	return "admin/signin";
+    }
+
+	/**************************************************
+	 * - 登録：管理者
+	 * 
+	 * ----------<< URL >>----------
+	 * http://localhost:8080/admin/signup
+	 **************************************************/
+    @GetMapping("/admin/signup")
+    public String registerAdmin(Model model) {
+    	model.addAttribute("adminForm", new AdminForm());
+    	return "admin/signup";
+    }
+    @PostMapping("/admin/signup")
+    public String registerAdmin(@Validated @ModelAttribute("adminForm") AdminForm adminForm, BindingResult errorResult /*HttpServletRequest request*/) {
+    	if (errorResult.hasErrors()) {
+            return "admin/signup";
+          }
+    	
+    	adminService.registerAdmin(adminForm);
+    	return "admin/signin";
+    }
 
 	/**************************************************
 	 * - 取得：お問い合わせ一覧
@@ -73,11 +108,6 @@ public class AdminController {
 			return "redirect:/admin/contactList";
 		}
 	}
-	
-	
-	/**************************************************
-	 * - 更新；特定のお問い合わせ
-	 **************************************************/
 	@PostMapping("/admin/contacts/{id}/edit")
 	public String updateContact(
 			@PathVariable Long id, @Validated @ModelAttribute ContactForm contactForm, BindingResult result, Model model) {
