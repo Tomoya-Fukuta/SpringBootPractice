@@ -10,6 +10,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.entity.Contact;
 import com.example.demo.form.AdminForm;
@@ -31,7 +36,10 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
+    @Autowired
 	private ContactService contactService;
+    @Autowired
+	private AuthenticationManager authenticationManager;
 
 	/**************************************************
 	 * - ログイン画面
@@ -42,6 +50,23 @@ public class AdminController {
     @GetMapping("/admin/signin")
     public String signinAdmin() {
     	return "admin/signin";
+    }
+    @PostMapping("/admin/signin")
+    public String login(@RequestParam String email, @RequestParam String password, Model model) {
+        try {
+            // 認証を実行し、結果を取得
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password)
+            );
+
+            // 認証情報をセッションに保存
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            return "redirect:/admin/contacts"; // ログイン成功時の遷移
+        } catch (Exception e) {
+            model.addAttribute("error", "メールアドレスまたはパスワードが間違っています。");
+            return "admin/contacts"; // 失敗時はログイン画面へ戻る
+        }
     }
 
 	/**************************************************

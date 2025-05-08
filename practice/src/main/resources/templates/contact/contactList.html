@@ -36,5 +36,9 @@
     </table>
     <button id="detailButton" onclick="redirectToDetail(this)">詳細</button>
 	<button id="deleteButton" onclick="deleteContact(this)">削除</button>
+
+	<form th:action="@{/logout}" method="post">
+	    <button type="submit">ログアウト</button>
+	</form>
 </body>
 </html>
