@@ -26,6 +26,7 @@ public class SecurityConfig {
     	http
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/admin/signup", "/admin/signin").permitAll() // 管理者登録 & ログイン画面へのアクセスを許可
+            .requestMatchers("/contact/**").permitAll() // contactエンドポイントは全て認証不要
             .anyRequest().authenticated() // その他のページは認証必須
         )
         .formLogin(form -> form
