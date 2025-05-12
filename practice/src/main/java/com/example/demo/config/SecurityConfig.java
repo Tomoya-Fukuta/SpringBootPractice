@@ -20,32 +20,6 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    	http
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/admin/signup", "/admin/signin").permitAll() // 管理者登録 & ログイン画面へのアクセスを許可
-            .requestMatchers("/contact/**").permitAll() // contactエンドポイントは全て認証不要
-            .anyRequest().authenticated() // その他のページは認証必須
-        )
-        .formLogin(form -> form
-            .loginPage("/admin/signin") // 独自ログインページを指定
-            .defaultSuccessUrl("/admin/contacts", true) // ログイン成功時のURLを指定 (常にリダイレクト)
-            .permitAll()
-        )
-        .logout(logout -> logout  
-            .logoutSuccessUrl("/admin/signin") // ログアウト成功時のURL
-            .permitAll()
-        );
-
-    return http.build();
-    }
-    
-    @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
 
     @Bean
     UserDetailsService userDetailsService(AdminRepository adminRepository) {
@@ -56,5 +30,32 @@ public class SecurityConfig {
                 .roles("ADMIN")
                 .build())
             .orElseThrow(() -> new UsernameNotFoundException("ユーザーが見つかりません: " + email));
+    }
+    
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable()) // CSRFを無効化
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/admin/signup", "/admin/signin").permitAll()
+                .requestMatchers("/contact/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/admin/signin")
+                .defaultSuccessUrl("/admin/contacts", true)
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/admin/signin")
+                .permitAll()
+            );
+
+        return http.build();
+    }
+    
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }
