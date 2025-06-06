@@ -1,6 +1,9 @@
 package com.example.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,4 +32,15 @@ public class AdminServiceImpl implements AdminService {
 		
 		adminRepository.save(admin);
 	}
+
+	@Override
+    public UserDetails loadAdminByEmail(String email) throws UsernameNotFoundException {
+        Admin admin = adminRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("メールアドレスが見つかりません: " + email));
+
+        return User.withUsername(admin.getEmail()) // ユーザー名にメールアドレスを使用
+            .password(admin.getPassword()) // ハッシュ化されたパスワード
+            .roles("ADMIN")
+            .build();
+    }
 }

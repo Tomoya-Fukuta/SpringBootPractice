@@ -13,7 +13,14 @@ function deleteContact(button) {
 		alert(contactId);
 	}
 
-    fetch(`/admin/contacts/${contactId}`, { method: 'DELETE' })
+	const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+	const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+	
+    fetch(`/admin/contacts/${contactId}`, {
+		method: 'DELETE',
+	 	headers: {
+			[csrfHeader]: csrfToken
+		} })
     .then(response => {
         if (response.ok) {
             alert("削除が完了しました。");
